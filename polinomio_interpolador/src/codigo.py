@@ -10,29 +10,35 @@ from modulos.precision import *
 #puntos = puntos a  grafifcar
 #f = funcion a graficar 
 def graficar(puntos_x,puntos_y,f,tituloGrafico:str):
+    plt.figure(figsize=(14, 8))
+
+    # Agregar un único eje al cual se le aplicará el gráfico
+    ax = plt.subplot(1, 1, 1)
+    DOMINIO = 1
     PUNTO_X_MAX =  max(puntos_x)
     PUNTO_X_MIN = min(puntos_x)
-    DOMINIO = 5
+
     #genero datos para el dominio de x
-    x_values = np.arange(PUNTO_X_MIN-DOMINIO,DOMINIO+PUNTO_X_MAX,step=0.01)
+    x_values = np.arange(PUNTO_X_MIN-DOMINIO,PUNTO_X_MAX+DOMINIO,step=0.01)
     #genero datos para la imagen de y
     y_values = ([f(x) for x in x_values])
-    #ploteo el grafico
-    plt.plot(x_values,y_values)
+
+    ax.plot(x_values,y_values)
     # Agregar el eje de abscisas
-    plt.axhline(y=0, color='black', linestyle='--')
+    ax.axhline(y=0, color='black', linestyle='--')
     # Agregar el eje de ordenadas
     plt.axvline(x=0, color='black', linestyle='--')
     #agrego puntos calulados 
-    plt.scatter(puntos_x,puntos_y,c="red")
-    #agrego labels
-    plt.xlabel('x')
-    plt.ylabel('f(x)')
-    plt.title(tituloGrafico)
-    PUNTOS_Y_MIN = min(puntos_y)
-    PUNTOS_Y_MAX = max(puntos_y)
-    plt.ylim(PUNTOS_Y_MIN-DOMINIO,PUNTOS_Y_MAX+DOMINIO)
-    #muestro el grafico
+    ax.scatter(puntos_x,puntos_y,color='red')
+
+    # Personalizar el gráfico
+    ax.set_title(tituloGrafico)
+    ax.set_xlabel("X")
+    ax.set_ylabel("F(X)")
+    ax.grid(True)
+
+    # Mostrar el gráfico
+    plt.tight_layout()
     plt.show()
 
 
@@ -156,3 +162,63 @@ def testeoGrado(puntos, funcion):
         raise Exception(f'Error: el grado del polinomio obtenido fue {grado_obtenido} y se esperaba {grado_teorico}.')
     
     return grado_obtenido
+
+def aproximarRaiz(start, tolerancia, funcion):
+    s = sp.symbols('x')
+    x = start
+    derivada = sp.lambdify(s,sp.diff(funcion(s)), modules=['numpy'])
+        
+    def secante():
+        try:
+            return x1 - ((funcion(x1)*(x1-x))/(funcion(x1)-funcion(x)))
+        except ZeroDivisionError:
+            print(f"error: f({x}) = 0, no se puede dividir por 0")
+            exit(6)
+    
+    while(True):    
+        try:
+            x1 = x - (funcion(x)/derivada(x))
+        except ZeroDivisionError:
+            print(f"error: f'({x}) = 0, no se puede dividir por 0")
+            exit(6)
+        
+        if (abs(x-x1) <= tolerancia):
+            break
+        x = secante()
+    
+    return round((x1), Presicion.presicionActual())
+
+##Polinomio de larange
+def lagrange_interpolation(points):
+    n = len(points)
+    polynomial = []
+    for i in range(n):
+        term = []
+        numerator = []
+        denominator = []
+        for j in range(n):
+            if i != j:
+                numerator.append('(x - {})'.format(points[j][0]))
+                denominator.append('({} - {})'.format(points[i][0], points[j][0]))
+        term.append('*'.join(numerator))
+        term.append('/'.join(denominator))
+        polynomial.append('*'.join(term))
+    polynomial = '+'.join(polynomial)
+    polynomial = sp.expand(polynomial)
+    
+    return polynomial
+
+
+def generar_funcion_lagrange(puntos):
+    x = sp.symbols('x')
+    n = len(puntos)
+    resultado = 0
+
+    for i in range(n):
+        termino = puntos[i][1]
+        for j in range(n):
+            if j != i:
+                termino *= (x - puntos[j][0]) / (puntos[i][0] - puntos[j][0])
+        resultado += termino
+    
+    return resultado
