@@ -126,20 +126,20 @@ class RegresionLinear(Regresion):
     def __init__(self, df: pd.DataFrame) -> None:
         super().__init__(df)
 
-    def numeradorM(self):
+    def numeradorA(self):
         return self.promediar(self.prodXY())-self.promediar(self.x_col())*self.promediar(self.y_col())
     
     def numeradorB(self):
         return self.promediar(self.x2())*self.promediar(self.y_col())-self.promediar(self.x_col())*self.promediar(self.prodXY())
     
-    def calcularM(self, rounded=False):
-        return round(self.numeradorM()/self.denominador(),Presicion.presicionActual()) if rounded else self.numeradorM()/self.denominador()
+    def calcularA(self, rounded=False):
+        return round(self.numeradorA()/self.denominador(),Presicion.presicionActual()) if rounded else self.numeradorA()/self.denominador()
 
     def calcularB(self, rounded=False):
         return round(self.numeradorB()/self.denominador(),Presicion.presicionActual()) if rounded else self.numeradorB()/self.denominador()
                 
     def obtenerEcuacionSimbolica(self):
-        equation = self.calcularM()*self.x+self.calcularB()
+        equation = self.calcularA()*self.x+self.calcularB()
         return equation
     
 class RegresionCuadratica(RegresionLinear):
@@ -157,7 +157,7 @@ class RegresionCuadratica(RegresionLinear):
         return round(np.e**temp,Presicion.presicionActual()) if rounded else np.e**temp
         
     def obtenerEcuacionSimbolica(self):
-        equation = self.calcularB()*self.x**self.calcularM()
+        equation = self.calcularB()*self.x**self.calcularA()
         return equation
 
 class RegresionExponencial(RegresionCuadratica):
@@ -168,7 +168,7 @@ class RegresionExponencial(RegresionCuadratica):
         return self.df.iloc[:,0]
         
     def obtenerEcuacionSimbolica(self):
-        equation = self.calcularB()*sp.E**(self.calcularM()*self.x)
+        equation = self.calcularB()*sp.E**(self.calcularA()*self.x)
         return equation
 
 # Interfaz
@@ -251,9 +251,8 @@ class DiferenciasNumericas:
     def _execute(self, tipoCalculo:MetodoAproximacion):
         return tipoCalculo.execute(self.x)
 
-def calcularTiempoDuplicacion(list:pd.Series):
-    growth_rate = np.log(2) / np.log(list.iloc[-1] / list.iloc[0])
-    doubling_time = np.log(2) / growth_rate
+def calcularTiempoDuplicacion(eq:RegresionExponencial):
+    doubling_time = np.log(2) / eq.calcularA()
     return round(doubling_time, Presicion.presicionActual())
     
 
