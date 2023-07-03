@@ -1,7 +1,7 @@
 import os
 import math
 
-SYMBOL = '🫧'#'♡'#'✧ '#'█▒'
+SYMBOL = '█ '#'♡'#'✧ '#'█▒'
 WIDTH = int(100/len(SYMBOL))
 LEFTMARGIN = 2
 

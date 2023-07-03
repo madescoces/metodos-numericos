@@ -1,8 +1,10 @@
+import sys
+sys.path.append(r'D:\Usuario\Pablo\Escritorio\workspace\metodos_numericos')
+
+from modulos.menu import *
 import numpy as np
 import sympy as sp
-import os
 import random
-from helper import *
 
 #Setteo la impresion de matrices con 2 decimales
 sp.init_printing(precision=2, use_unicode=True)
