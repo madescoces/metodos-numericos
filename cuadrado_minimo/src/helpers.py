@@ -1,46 +1,14 @@
+import sys
+sys.path.append(r'D:\Usuario\Pablo\Escritorio\workspace\metodos_numericos')
+
 from abc import ABC, abstractmethod
 import sympy as sp
 import pandas as pd
 import numpy as np
 import re
+from modulos.precision import *
 
 np.set_printoptions(suppress=True)
-
-class Presicion:
-    PRECISION = 2
-
-    @classmethod
-    def cambiarPresicionRepresentacion(cls, errorTolerado: float):
-        cls.validarFlotante(errorTolerado)
-        cls.validarFormatoError(errorTolerado)
-        cls.PRECISION = cls.digitosDePresicion(errorTolerado)
-
-    @classmethod
-    def digitosDePresicion(cls, valor) -> int:
-        valorTXT = cls.decimalASTR(valor)
-        return len(valorTXT.split('.')[-1])
-
-    @classmethod
-    def presicionActual(cls) -> int:
-        return cls.PRECISION
-
-    @staticmethod
-    def validarFlotante(numero):
-        try:
-            float(numero)
-        except:
-            raise TypeError(f"Se esperaba float y se obtuvo {type(numero).__name__}.")
-    
-    @classmethod
-    def validarFormatoError(cls, numero):
-        patron = r"^(0\.0+1|0\.1)$"        
-        if not bool(re.match(patron, cls.decimalASTR(numero))):
-            raise ValueError(f"Se esperaba un número del tipo 0.01 y se obtuvo {numero}.")
-    
-    @staticmethod
-    def decimalASTR(numero):
-        decimales = abs(int(np.log10(numero)))
-        return '{:.{}f}'.format(numero, decimales)
 
 #Clase general regresiones lineal, cuadratica y exponencial
 class Regresion:
@@ -115,7 +83,7 @@ class Regresion:
 
         # Redondea cada número a 4 decimales y conviértelo a cadena
         rounded_numbers = [str(round(float(num), Presicion.presicionActual())) for num in numbers]
-
+       
         # Reemplaza los números originales por los números redondeados en la ecuación
         return sp.sympify(re.sub(pattern, lambda m: rounded_numbers.pop(0), str(self.obtenerEcuacionSimbolica())))
 

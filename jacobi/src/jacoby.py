@@ -47,7 +47,7 @@ def datosJacobi():
     print(A)        
 
     # Pedir al usuario los elementos del vector B
-    print("\nIngrese la matirz B:")
+    print("\nIngrese la matriz B:")
     B = np.zeros(n)
     for i in range(n):
         B[i] = float(input(f"Ingrese el elemento b[{i}]: "))

@@ -1,10 +1,15 @@
+import sys
+sys.path.append(r'D:\Usuario\Pablo\Escritorio\workspace\metodos_numericos')
+
 import sympy as sp
 import numpy as np
 import matplotlib.pyplot as plt
+import re
+from modulos.precision import *
 
 #puntos = puntos a  grafifcar
 #f = funcion a graficar 
-def grafico(puntos_x,puntos_y,f,tituloGrafico:str):
+def graficar(puntos_x,puntos_y,f,tituloGrafico:str):
     PUNTO_X_MAX =  max(puntos_x)
     PUNTO_X_MIN = min(puntos_x)
     DOMINIO = 5
@@ -36,8 +41,8 @@ def productoria(points, step, txt=False, **kwargs):
     evaluado = 1
     noEvaluado = ""
     for i in range(step):
-        noEvaluado += f'*(x-{points[i][0]})'
-        evaluado *= (x - points[i][0])
+        noEvaluado += f'*(x - ({points[i][0]}))'
+        evaluado *= (x - (points[i][0]))
     return evaluado if not txt else noEvaluado   
 
 def alphas(points:list):
@@ -54,18 +59,6 @@ def alphas(points:list):
         alphaList.append(alpha)
        
     return alphaList
-
-def nEquation(points, **kwargs):
-    pn =  kwargs['pn'] if 'pn' in kwargs else len(points)
-    x = sp.symbols('x')
-    equations = []
-    alphaList = alphas(points)
-    equation = f'{alphaList[0]}'
-
-    for i in range(pn):
-        if i > 0:
-            equation += f'{"+" if alphaList[i] > 0 else ""}{alphaList[i]}{productoria(points,i,True)}'
-    return sp.lambdify(x,equation,np)
 
 def validarNum(txt:str, nat=False, **kwargs):
     min =  kwargs['min'] if 'min' in kwargs else None
@@ -91,6 +84,37 @@ def choice(txt:str):
         print(f'Se esperaba S/N pero se obtubo {ch}.')
         ch = str(input(txt))
     return True if ch.lower() == 's' else False
+
+def saltosDeLinea(cantSaltos):
+    for i in range(cantSaltos): print("\n")
+
+def generacionPuntosAleatorios(cantPuntos):
+    puntos_x = np.random.choice(np.round(np.random.uniform(-10, 30, size=cantPuntos),3), size=cantPuntos, replace=False)
+    puntos_y = np.random.choice(np.round(np.random.uniform(-20, 40, size=cantPuntos),3), size=cantPuntos, replace=False)
+    return [(x,y) for x,y in zip(puntos_x, puntos_y)]
+
+class NEquation:
+    def __init__(self, points, **kwargs) -> None:
+        self.pn =  kwargs['pn'] if 'pn' in kwargs else len(points)    
+        self.points = points
+        self.x = sp.symbols('x')
+        
+    def obtenerEcuacionSimbolica(self):        
+        alphaList = alphas(self.points)
+        equation = f'{alphaList[0]}'
+
+        for i in range(self.pn):
+            if i > 0:
+                equation += f'{"+" if alphaList[i] > 0 else ""}{round(alphaList[i],Presicion.presicionActual())}{productoria(self.points,i,True)}'
+        
+        return equation
+
+    def equation(self):
+        equation = self.obtenerEcuacionSimbolica()
+        return sp.lambdify(self.x, equation, modules=['numpy'])
+
+    def imprimirEcuacion(self):
+        return sp.sympify(self.obtenerEcuacionSimbolica())
 
 class Puntos:
     def __init__(self, manualStep=False):
@@ -122,3 +146,13 @@ class PuntosAleatorios(Puntos):
         #Genera arrays con numeros aleatorios y diferentes entre si
         self.YN = np.random.choice(np.round(np.random.uniform(self.y_min, self.y_max, size = self.steps),3), size=self.steps, replace=False)
         self.XN = np.random.choice(np.round(np.random.uniform(self.x_min, self.x_max, size = self.steps),3), size=self.steps, replace=False)
+
+
+def testeoGrado(puntos, funcion):
+    grado_teorico = len(puntos) - 1
+    grado_obtenido = sp.degree(funcion)
+
+    if (grado_teorico != grado_obtenido):
+        raise Exception(f'Error: el grado del polinomio obtenido fue {grado_obtenido} y se esperaba {grado_teorico}.')
+    
+    return grado_obtenido
