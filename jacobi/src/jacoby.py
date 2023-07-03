@@ -22,35 +22,60 @@ def presentacion():
     print("\n\n")
 
 
+
 def datosJacobi():
     # Pedir al usuario la dimensión del sistema de ecuaciones
-    n = int(input("Ingrese la dimensión del sistema de ecuaciones: "))
+    #n = int(input("Ingrese la dimensión del sistema de ecuaciones: "))
 
     # Pedir al usuario los elementos de la matriz A
-    print("Ingrese la matriz A:")
-    A = np.zeros((n, n))
-    for i in range(n):
-        for j in range(n):
-            A[i, j] = float(input(f"Ingrese el elemento A[{i}][{j}]: "))
+    #print("Ingrese la matriz A:")
+    #A = np.zeros((n, n))
+    #for i in range(n):
+    #   for j in range(n):
+    #        A[i, j] = float(input(f"Ingrese el elemento A[{i}][{j}]: "))
     
-    
-    while not validarMatriz(A):
+    n = 3
+
+    #A = np.array([[3, 4, -2],
+    #               [2, -3, 4],
+    #               [1, -2, 3]])
+    B = np.array([-2, 6, 7])
+
+    matriz2 = np.array([[1, 1, -2], 
+                        [1, -4, 1], 
+                        [0, 2, -3]])
+    vector2 = np.array([11, 0, -3])
+
+
+    A = np.array([[ 1,  1, -2],
+    [ 0, -4,  1],
+    [ 0,  0, -3]])
+
+
+    while es_singular(A):
         print("\nLa matriz ingresada no cumple con las exigencias del algoritmo de Jacobi.")
-        print("Por favor, ingrese una matriz que sea diagonal dominante y no singular.")
+        print("Por favor, ingrese una matriz que sea no singular.")
         print("Ingrese la matriz A:")
         A = np.zeros((n, n))
         for i in range(n):
             for j in range(n):
                 A[i, j] = float(input(f"Ingrese el elemento A[{i}][{j}]: "))
     
-    print("Esto es la matriz A")
-    print(A)        
+    if es_diagonal_dominante_filas(A):
+        print("\nDATO: La matriz es diagonal dominante en filas. Lo que significa que es muy posible que converga con Jacobi")
+    elif es_diagonal_dominante_columnas(A):
+        print("\nDATO: La matriz es diagonal dominante en columnas. Lo que significa que es muy posible que converga con Jacobi")
+    else:
+        print("\nDATO: La matriz no es diagonal dominante. Lo que no garantiza que mediante Jacobi llegue a converger")
+
+    print("\nEsto es la matriz A")
+    print(A)
 
     # Pedir al usuario los elementos del vector B
-    print("\nIngrese la matriz B:")
-    B = np.zeros(n)
-    for i in range(n):
-        B[i] = float(input(f"Ingrese el elemento b[{i}]: "))
+    #print("\nIngrese la matirz B:")
+    # B = np.zeros(n)
+    # for i in range(n):
+    #    B[i] = float(input(f"Ingrese el elemento b[{i}]: "))
 
     print("\nEste es el vector B")
     print(B)
@@ -75,21 +100,29 @@ def datosJacobi():
     tolerancia = float(tolerancia)
 
     return (A,B,x0,tolerancia,exactitud)
-    
-def validarMatriz(A):
-    n = A.shape[0]
-    
-    # Verificar matriz diagonal dominante
-    for i in range(n):
-        row_sum = np.sum(np.abs(A[i, :])) - np.abs(A[i, i])
-        if np.abs(A[i, i]) <= row_sum:
+
+def es_diagonal_dominante_filas(matriz):
+    filas, columnas = matriz.shape
+    for i in range(filas):
+        suma = np.sum(np.abs(matriz[i,:])) - np.abs(matriz[i,i])
+        if np.abs(matriz[i,i]) <= suma:
             return False
-    
-    # Verificar matriz no singular
-    if np.linalg.det(A) == 0:
-        return False
-    
     return True
+
+def es_diagonal_dominante_columnas(matriz):
+    filas, columnas = matriz.shape
+    for j in range(columnas):
+        suma = np.sum(np.abs(matriz[:,j])) - np.abs(matriz[j,j])
+        if np.abs(matriz[j,j]) <= suma:
+            return False
+    return True
+
+def es_singular(matriz):
+    determinante = np.linalg.det(matriz)
+    if determinante == 0:
+        return True
+    else:
+        return False
 
 def truncar_array(array, decimales):
     factor = np.power(10, decimales)
@@ -175,6 +208,5 @@ def main():
     print("Número de iteraciones:", num_iterations)
 
     graficarConvergencia(convergencia,X)    
-   
-        
+       
 main()
