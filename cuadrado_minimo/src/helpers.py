@@ -139,6 +139,17 @@ class RegresionExponencial(RegresionCuadratica):
         equation = self.calcularB()*sp.E**(self.calcularA()*self.x)
         return equation
 
+class RegresionLogaritmica(RegresionLinear):
+    def init(self, df: pd.DataFrame) -> None:
+        super().init(df)
+        
+    def x_col(self):
+        return np.log(super().x_col())
+        
+    def obtenerEcuacionSimbolica(self):
+        equation = self.calcularA()*sp.log(self.x) + self.calcularB()
+        return equation
+
 # Interfaz
 class MetodoAproximacion(ABC):
 
